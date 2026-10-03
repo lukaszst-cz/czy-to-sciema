@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#163de0">
+  <meta name="description" content="Sprawdź podejrzany SMS, e-mail, link, zdjęcie lub kod QR. Zobacz sygnały ryzyka i zapytaj bliską osobę. Analiza na Twoim urządzeniu.">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; img-src 'self' blob: data:; style-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <title>CzyToŚciema? Sprawdź, zanim klikniesz.</title>
+</head>
+<body>
+  <a class="skip" href="#message">Przejdź do sprawdzania</a>
+  <header class="header wrap">
+    <a class="brand" href="./" aria-label="CzyToŚciema? Strona główna"><img src="./icon.svg" alt="" width="38" height="38"><span>CzyTo<span class="brand-blue">Ściema?</span></span></a>
+    <nav aria-label="Nawigacja"><button id="large-type" class="quiet" aria-label="Duże litery" aria-pressed="false">Aa <span>Duże litery</span></button><a href="#help">Pomoc</a></nav>
+  </header>
+  <main class="wrap">
+    <section class="intro" aria-labelledby="intro-heading">
+      <div class="eyebrow"><span class="dot"></span> ZATRZYMAJ SIĘ NA CHWILĘ</div>
+      <h1 id="intro-heading">Sprawdź, zanim<br><span>klikniesz.</span></h1>
+      <p>Coś się nie zgadza w wiadomości?<br>Wklej ją tutaj. Pokażemy, na co uważać.</p>
+      <div class="privacy-pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5zM12 14v3"/></svg>Treść zostaje na Twoim urządzeniu</div>
+    </section>
+    <div class="workspace">
+      <section class="card input-card" aria-labelledby="input-heading">
+        <div class="card-top"><h2 id="input-heading">Co chcesz sprawdzić?</h2><span class="step">01 / 02</span></div>
+        <form id="analysis-form" novalidate>
+          <label for="message">Wiadomość lub link</label>
+          <textarea id="message" name="message" maxlength="20000" rows="7" placeholder="Wklej SMS, e-mail, ofertę lub adres strony…" aria-describedby="input-hint char-count" spellcheck="false" autocomplete="off"></textarea>
+          <div class="input-meta"><span id="input-hint">Nie musisz klikać podejrzanego linku.</span><span id="char-count">0 / 20 000</span></div>
+          <div class="file-zone">
+            <div><strong>Masz zdjęcie lub kod QR?</strong><p>Dodaj zrzut ekranu albo zdjęcie wiadomości.</p></div>
+            <label class="file-button" for="image-input"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v14H4zM9 6l2-3h4l2 3M9 13a3 3 0 1 0 6 0 3 3 0 0 0-6 0"/></svg>Dodaj obraz</label>
+            <input id="image-input" type="file" accept="image/png,image/jpeg,image/webp,image/bmp" aria-label="Dodaj obraz wiadomości lub QR">
+          </div>
+          <div id="image-tools" hidden><p id="file-name"></p><div class="row"><button id="ocr-button" type="button" class="secondary">Odczytaj tekst ze zdjęcia</button><button id="qr-button" type="button" class="secondary">Odczytaj kod QR</button><button id="cancel-image" type="button" class="quiet" hidden>Anuluj odczyt</button></div><p id="image-status" class="status" role="status"></p></div>
+          <p id="form-error" class="error" role="alert" hidden></p>
+          <div class="primary-row"><button id="analyze-button" class="primary" type="submit">Sprawdź wiadomość <span aria-hidden="true">→</span></button><button id="clear-button" type="button" class="quiet">Wyczyść</button></div>
+        </form>
+        <details class="examples"><summary>Nie masz wiadomości? Wypróbuj przykład</summary><div class="row"><button data-example="parcel" class="chip">Dopłata do paczki</button><button data-example="bank" class="chip">Wiadomość z banku</button><button data-example="family" class="chip">Prośba o BLIK</button><button data-example="ordinary" class="chip">Zwykła wiadomość</button></div></details>
+      </section>
+      <section id="result" class="card result-card" aria-labelledby="result-heading" tabindex="-1">
+        <div class="card-top"><h2 id="result-heading">Twoja ocena</h2><span class="step">02 / 02</span></div>
+        <div id="empty-result" class="empty-result"><div class="shield-outline" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M32 6 53 14v17c0 12-12 22-21 27-9-5-21-15-21-27V14zM24 31l6 6 12-13"/></svg></div><h3>Najpierw sprawdź.<br>Potem zdecyduj.</h3><p>Tutaj zobaczysz ocenę ryzyka,<br>powody i bezpieczny następny krok.</p><span class="small">Około kilku sekund dla tekstu</span></div>
+        <div id="filled-result" hidden>
+          <div id="risk-box" class="risk-box" role="status"><span id="risk-label" class="risk-label"></span><h3 id="risk-heading"></h3><p id="risk-summary"></p></div>
+          <h3 class="section-label">Dlaczego taka ocena?</h3><ul id="reasons" class="reasons"></ul>
+          <details id="links-details" hidden><summary>Sprawdzone adresy</summary><ul id="links-list" class="links-list"></ul><p class="small">Adresy są odczytywane lokalnie. Nie odwiedzamy stron i nie rozwijamy przekierowań.</p></details>
+          <div class="next-step"><h3>Co teraz?</h3><p id="next-step"></p></div>
+          <button id="share-button" class="primary share-button" type="button">Zapytaj bliską osobę <span aria-hidden="true">↗</span></button>
+          <p class="small share-note">Najpierw pokażemy treść do udostępnienia. Oryginalna wiadomość i linki nie są dołączane.</p>
+          <p class="small limits">To analiza sygnałów ryzyka, nie potwierdzenie nadawcy. Nie rozpoznajemy autentyczności głosu ani deepfake’ów.</p>
+        </div>
+      </section>
+    </div>
+    <div class="trust-row"><span>✓ Bez konta</span><span>✓ Bez reklam</span><span>✓ Zdjęcia odczytujemy lokalnie</span><span id="offline-status" role="status">Przygotowuję tryb offline…</span></div>
+    <p id="list-status" class="list-status" role="status">Wczytuję kopię listy ostrzeżeń CERT Polska…</p>
+    <section id="help" class="help-section" aria-labelledby="help-heading">
+      <div><span class="eyebrow">SPOKOJNIE, KROK PO KROKU</span><h2 id="help-heading">Nie wiesz, co zrobić?</h2><p>Nie musisz od razu odpowiadać.<br>Najpierw sprawdź sprawę innym kanałem.</p></div>
+      <div class="help-items">
+        <details><summary>Już kliknąłem lub podałem dane</summary><p>Jeśli podałeś dane bankowe albo zatwierdziłeś płatność, pilnie skontaktuj się ze swoim bankiem przez numer z karty lub jego oficjalną aplikację. Jeśli podałeś hasło, zmień je na prawdziwej stronie usługi, również tam, gdzie go używasz ponownie. Jeżeli zainstalowałeś zdalny dostęp, odłącz urządzenie od internetu i skontaktuj się z pomocą z innego urządzenia. Zachowaj wiadomość jako dowód.</p></details>
+        <details><summary>Jak zgłosić podejrzaną wiadomość?</summary><p>Podejrzany SMS możesz przekazać na numer <strong>8080</strong>. Formularz CERT Polska jest dostępny na <a href="https://incydent.cert.pl/" target="_blank" rel="noopener noreferrer">incydent.cert.pl</a>. Aplikacja niczego nie zgłasza automatycznie.</p></details>
+        <details id="install-help"><summary>Jak dodać aplikację do telefonu?</summary><p><strong>Android / Chrome:</strong> otwórz menu przeglądarki i wybierz „Zainstaluj aplikację” lub „Dodaj do ekranu głównego”. <strong>iPhone / Safari:</strong> wybierz Udostępnij, a potem „Do ekranu początkowego”. Na komputerze możesz użyć ikony instalacji w Chrome lub Edge. Pierwsze otwarcie wymaga internetu. Offline zadziała po komunikacie „Gotowa offline”.</p><button id="install-button" class="secondary" hidden>Zainstaluj aplikację</button></details>
+        <details><summary>Prywatność i sposób oceny</summary><p>Wiadomości i obrazy przetwarzamy w Twojej przeglądarce. Nie wysyłamy ich na serwer, nie zapisujemy historii i nie stosujemy analityki ani reklam. Ustawienie dużych liter może zostać zapisane na urządzeniu. Serwer hostingu otrzymuje zwykłe żądania plików aplikacji, tak jak przy otwieraniu strony. Udostępnienie raportu wymaga Twojego działania i wyboru odbiorcy.</p><p>Analiza używa jawnych reguł: prośby o kody i hasła, presja czasu, podejrzane płatności oraz budowa domen. Kopia listy CERT ma własną datę; może być niepełna lub nieaktualna. Brak wpisu i HTTPS nie oznaczają bezpieczeństwa. Nie pobieramy treści podejrzanych stron.</p><p>Źródła: <a href="https://cert.pl/lista-ostrzezen/" target="_blank" rel="noopener noreferrer">Lista ostrzeżeń CERT Polska</a>, <a href="https://cert.pl/szybkie-przelewy/" target="_blank" rel="noopener noreferrer">fałszywe prośby o przelew</a>, <a href="https://cert.pl/baza-wiedzy/niebezpieczne-platnosci/" target="_blank" rel="noopener noreferrer">bezpieczne płatności</a>.</p></details>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap footer"><span>CzyToŚciema? <span class="small">v1.0.0</span></span><span>Chwila na sprawdzenie. Więcej spokoju.</span></footer>
+  <dialog id="share-dialog" aria-labelledby="share-heading"><div class="dialog-body"><h2 id="share-heading">Zapytaj kogoś, komu ufasz</h2><p>Udostępnisz samą ocenę i nazwy sygnałów. Wybierz odbiorcę w następnym kroku.</p><label for="share-text">Podgląd wiadomości</label><textarea id="share-text" rows="9" readonly></textarea><div class="row"><button id="native-share" class="primary">Udostępnij</button><button id="copy-report" class="secondary">Kopiuj</button><button id="download-report" class="secondary">Pobierz TXT</button><button id="close-share" class="quiet">Zamknij</button></div><p id="share-status" class="status" role="status"></p></div></dialog>
+  <noscript><p class="error wrap">Włącz JavaScript, aby analizować wiadomości lokalnie. Podejrzany SMS możesz przekazać do CERT Polska na 8080.</p></noscript>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

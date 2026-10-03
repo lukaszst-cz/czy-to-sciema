@@ -1,0 +1,10 @@
+node_modules/
+dist/
+public/ocr/
+public/data/
+public/icon-*.png
+test-results/
+.DS_Store
+*.log
+.env*
+!.env.example
