@@ -37,7 +37,7 @@ pnpm exec playwright install --with-deps chromium firefox webkit
 pnpm test:e2e
 ```
 
-Testy obejmują 38 scenariuszy analizy oraz przepływy na silnikach Chromium, Firefox i WebKit: desktop, telefon, tablet, szerokość 320 px, dużą czcionkę, formularz, prywatność raportu, XSS, nieaktualny wynik, OCR, QR, błędny plik, odświeżenie i OCR offline. Raport JSON oraz zrzuty ekranu są w `test-results/`. Profile urządzeń są emulowane; nie stanowią testu na fizycznym iPhonie lub telefonie z Androidem.
+Testy obejmują 42 scenariusze analizy oraz przepływy na silnikach Chromium, Firefox i WebKit: desktop, telefon, tablet, szerokość 320 px, dużą czcionkę, formularz, prywatność raportu, XSS, nieaktualny wynik, OCR, QR, błędny plik, odświeżenie i OCR offline. Offline jest sprawdzany przez wyłączenie rzeczywistego serwera, bez podstawiania odpowiedzi. Raport JSON oraz zrzuty ekranu są w `test-results/`. Profile urządzeń są emulowane; nie stanowią testu na fizycznym iPhonie lub telefonie z Androidem.
 
 GitHub Actions sprawdza kod i publikuje dopiero po powodzeniu testów. Kopia listy CERT jest pobierana przy wydaniu i co 6 godzin przez harmonogram Actions, którego start może być opóźniony przez GitHub. Aplikacja pokazuje dokładną datę pobrania i ostrzega po 24 godzinach. Lista offline jest kopią zainstalowanej wersji. CERT zaleca odświeżanie co 5 minut w systemach blokujących ruch; aplikacja nie jest filtrem sieciowym ani usługą sprawdzania na żywo.
 
@@ -51,3 +51,4 @@ GitHub Actions sprawdza kod i publikuje dopiero po powodzeniu testów. Kopia lis
 - Każdy tekst, także polecenia i HTML w wiadomości lub QR, pozostaje danymi; interfejs używa `textContent`.
 
 Źródła: [CERT: lista i formaty](https://cert.pl/lista-ostrzezen/), [prośby o szybki przelew](https://cert.pl/szybkie-przelewy/), [niebezpieczne płatności](https://cert.pl/baza-wiedzy/niebezpieczne-platnosci/), [dokumentacja Tesseract.js](https://github.com/naptha/tesseract.js/blob/master/docs/local-installation.md).
+

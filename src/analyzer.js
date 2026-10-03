@@ -20,7 +20,7 @@ export const BRANDS = [
 ];
 const shorteners = new Set(['bit.ly', 'tinyurl.com', 't.co', 'is.gd', 'cutt.ly', 'rb.gy', 'shorturl.at', 'rebrand.ly', 'linktr.ee']);
 export function normalize(text) {
-  return text.normalize('NFKC').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replaceAll('ł', 'l').replaceAll('Ł', 'L').toLowerCase();
+  return text.normalize('NFKC').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[\u200b-\u200f\u202a-\u202e\u2060\u2066-\u2069\ufeff]/g, '').replace(/\s+/g, ' ').replaceAll('ł', 'l').replaceAll('Ł', 'L').toLowerCase();
 }
 const isWithin = (host, domain) => host === domain || host.endsWith('.' + domain);
 export function listedDomain(host, list = new Set()) {
@@ -30,7 +30,7 @@ export function listedDomain(host, list = new Set()) {
 }
 export function extractLinks(text) {
   // Never request or navigate to extracted links. Remove common defanging only for local parsing.
-  const source = text.replace(/hxxps?:\/\//gi, s => s.toLowerCase().replace('xx', 'tt')).replace(/\[\.\]|\(\.\)/g, '.');
+  const source = text.normalize('NFKC').replace(/[\u200b-\u200f\u202a-\u202e\u2060\u2066-\u2069\ufeff]/g, '').replace(/hxxps?:\/\//gi, s => s.toLowerCase().replace('xx', 'tt')).replace(/\[\.\]|\(\.\)/g, '.');
   const matches = source.match(/(?:[a-z][a-z0-9+.-]*:\/\/|www\.)[^\s<>"\u200b-\u200f]+|\b(?:[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?\.)+(?:[a-z]{2,24}|xn--[a-z0-9-]+)(?::\d+)?(?:\/[^\s<>"\u200b-\u200f]*)?/giu) || [];
   return [...new Set(matches.map(raw => raw.replace(/[),;.!?\]}]+$/g, '')))].slice(0, 40).map(raw => {
     try {
@@ -66,7 +66,7 @@ export function analyze(input, options = {}) {
   if (marketplace && /(?:odbierz|otrzym|odebra|potwierdz).{0,50}(?:pieniadz|platn|przelew)|(?:karta|cvv|cvc).{0,50}(?:otrzym|odbior|odebra)/.test(text)) add('marketplace', '„Odbiór pieniędzy” przez formularz', 'Kupujący nie powinien kierować sprzedającego do obcego formularza z danymi karty. Sprawdź transakcję w aplikacji platformy.', 5);
   if (/gwarantowan.{0,35}(?:zysk|zwrot)|bez ryzyka.{0,35}(?:zysk|inwest)|(?:zysk|zarob).{0,30}\d{2,}\s*%/.test(text)) add('investment', 'Obietnica nadzwyczajnego zysku', 'Gwarancja dużego zarobku albo inwestycja „bez ryzyka” to poważny sygnał ostrzegawczy.', 5);
   if (/mamo|tato|babciu|dziadku/.test(text) && /nowy numer|zepsul.{0,20}telefon|zgubil.{0,20}telefon/.test(text) && payment) add('family', 'Nowy numer i prośba o pieniądze', 'Może to być podszywanie się pod bliską osobę. Zadzwoń na jej dotychczasowy numer, zanim zapłacisz.', 5);
-  if (/[\u200b-\u200f\u202a-\u202e\u2066-\u2069]/.test(original)) add('hidden', 'Ukryte znaki w treści', 'Niewidoczne znaki mogą maskować nazwę lub adres. Mogą też wynikać z kopiowania; sprawdź oryginał.', 1);
+  if (/[\u200b-\u200f\u202a-\u202e\u2060\u2066-\u2069\ufeff]/.test(original)) add('hidden', 'Ukryte znaki w treści', 'Niewidoczne znaki mogą maskować nazwę lub adres. Mogą też wynikać z kopiowania; sprawdź oryginał.', 1);
   if (/javascript\s*:|data\s*:text\/html|powershell|cmd\s*\/c|(?:windows|win)\s*\+\s*r/.test(text)) add('command', 'Kod lub polecenie zamiast zwykłego linku', 'Nie wklejaj poleceń do okna systemowego i nie uruchamiaj kodu przesłanego w wiadomości.', 5);
   const brands = BRANDS.filter(b => b.pattern.test(text));
   for (const link of links) {
@@ -98,3 +98,4 @@ export function shareReport(result) {
   // Deliberately omit the original message, URLs, names, phone numbers and account numbers.
   return `CzyToŚciema?\n${result.label}\n${result.summary}\n\nSygnały: ${result.reasons.length ? result.reasons.map(r=>r.title).join('; ') : 'Nie znaleziono opisanych schematów.'}\n\nMożesz pomóc mi sprawdzić tę wiadomość? Skontaktuj się ze mną znanym wcześniej kanałem.\n\nOcena opiera się na regułach i nie potwierdza nadawcy. Oryginalna wiadomość i linki nie zostały dołączone.`;
 }
+

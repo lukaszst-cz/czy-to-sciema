@@ -42,3 +42,8 @@ test('shared report excludes message, URLs and private identifiers',()=>{const i
 test('hostile HTML is data',()=>{const r=analyze('<img src=x onerror=alert(1)> Podaj hasło');assert.equal(r.level,'high');});
 test('long multi-link input bounded',()=>{const r=analyze(Array.from({length:100},(_,i)=>`https://a${i}.example`).join(' '));assert.equal(r.links.length,40);assert.equal(r.limited,true);});
 test('HTTPS alone never produces safe verdict',()=>assert.equal(analyze('https://secure.example').level,'unknown'));
+test('multi-line request for secrets is recognised',()=>assert.equal(analyze('Prosimy podaj\n\n hasło i kod SMS').level,'high'));
+test('invisible characters do not hide BLIK request',()=>{const r=analyze('Wyślij kod B\u200bLIK');assert.equal(r.level,'high');assert.ok(r.reasons.some(x=>x.id==='hidden'));});
+test('invisible characters do not hide CERT host',()=>{const r=analyze('https://scam\u2060.example',{domains:new Set(['scam.example'])});assert.equal(r.level,'high');});
+test('full-width domain spelling is normalised',()=>assert.equal(extractLinks('https://ｅｘａｍｐｌｅ．ｃｏｍ')[0].host,'example.com'));
+
